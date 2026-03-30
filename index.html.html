@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HSE Quiz — ProTrainers Consultant</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0d;
+    --surface: #111a14;
+    --card: #162019;
+    --green: #22c55e;
+    --green-dim: #15803d;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --text: #e8f5ec;
+    --muted: #6b8c74;
+    --border: #1f3325;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'DM Sans',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+
+  /* === HERO === */
+  #hero{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:60px 24px;
+    text-align:center;
+    overflow:hidden;
+  }
+  #hero::before{
+    content:'';
+    position:absolute;inset:0;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(34,197,94,.15) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 80% 80%, rgba(245,158,11,.06) 0%, transparent 60%);
+    pointer-events:none;
+  }
+  .grid-bg{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(34,197,94,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,197,94,.04) 1px, transparent 1px);
+    background-size:40px 40px;
+    pointer-events:none;
+  }
+  .badge{
+    display:inline-flex;align-items:center;gap:8px;
+    background:rgba(34,197,94,.1);
+    border:1px solid rgba(34,197,94,.25);
+    border-radius:100px;
+    padding:6px 16px;
+    font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--green);
+    margin-bottom:28px;
+    animation:fadeDown .6s ease both;
+  }
+  .badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.4s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  h1{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(56px,10vw,120px);
+    line-height:.95;
+    letter-spacing:.02em;
+    color:#fff;
+    animation:fadeDown .7s .1s ease both;
+  }
+  h1 span{color:var(--green);}
+  .hero-sub{
+    font-size:clamp(15px,2vw,18px);
+    color:var(--muted);
+    max-width:520px;
+    margin:20px auto 40px;
+    line-height:1.7;
+    animation:fadeDown .7s .2s ease both;
+  }
+  .meta-row{
+    display:flex;gap:24px;flex-wrap:wrap;justify-content:center;
+    margin-bottom:48px;
+    animation:fadeDown .7s .3s ease both;
+  }
+  .meta-pill{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 20px;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .meta-pill strong{color:var(--text);display:block;font-size:20px;font-weight:600;}
+  .start-btn{
+    background:var(--green);
+    color:#000;
+    border:none;
+    border-radius:12px;
+    padding:16px 48px;
+    font-family:'DM Sans',sans-serif;
+    font-size:16px;font-weight:700;
+    cursor:pointer;
+    transition:all .2s;
+    animation:fadeDown .7s .4s ease both;
+    letter-spacing:.02em;
+  }
+  .start-btn:hover{background:#16a34a;transform:translateY(-2px);box-shadow:0 8px 32px rgba(34,197,94,.3);}
+
+  @keyframes fadeDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+
+  /* === QUIZ === */
+  #quiz-screen{display:none;min-height:100vh;padding:0 0 80px;}
+
+  .quiz-header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(10,15,13,.92);
+    backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:16px 24px;
+    display:flex;align-items:center;gap:16px;
+  }
+  .q-counter{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:28px;color:var(--green);
+    min-width:80px;
+  }
+  .progress-bar-wrap{flex:1;height:6px;background:var(--border);border-radius:100px;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--green),#86efac);border-radius:100px;transition:width .4s ease;}
+  .score-live{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;color:var(--muted);
+    white-space:nowrap;
+  }
+  .score-live span{color:var(--green);font-weight:700;}
+
+  .quiz-body{max-width:760px;margin:0 auto;padding:40px 24px 0;}
+  .section-tag{
+    display:inline-block;
+    background:rgba(34,197,94,.08);
+    border:1px solid rgba(34,197,94,.2);
+    border-radius:6px;
+    padding:3px 10px;
+    font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--green);
+    margin-bottom:16px;
+  }
+  .question-text{
+    font-size:clamp(17px,2.5vw,22px);
+    font-weight:500;
+    line-height:1.55;
+    color:#fff;
+    margin-bottom:28px;
+  }
+  .options{display:flex;flex-direction:column;gap:12px;margin-bottom:32px;}
+  .opt{
+    background:var(--card);
+    border:1.5px solid var(--border);
+    border-radius:12px;
+    padding:16px 20px;
+    cursor:pointer;
+    display:flex;align-items:center;gap:16px;
+    transition:all .18s;
+    font-size:15px;
+    color:var(--text);
+    position:relative;
+    overflow:hidden;
+  }
+  .opt::before{
+    content:'';
+    position:absolute;left:0;top:0;bottom:0;
+    width:3px;background:transparent;
+    transition:background .18s;
+  }
+  .opt:hover:not(.disabled){border-color:var(--green-dim);background:#1a2e1e;}
+  .opt:hover:not(.disabled)::before{background:var(--green);}
+  .opt-letter{
+    width:30px;height:30px;border-radius:8px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+    color:var(--muted);
+    flex-shrink:0;
+    transition:all .18s;
+  }
+  .opt:hover:not(.disabled) .opt-letter{background:var(--green);color:#000;border-color:var(--green);}
+  .opt.correct{border-color:var(--green);background:rgba(34,197,94,.1);}
+  .opt.correct::before{background:var(--green);}
+  .opt.correct .opt-letter{background:var(--green);color:#000;border-color:var(--green);}
+  .opt.wrong{border-color:var(--red);background:rgba(239,68,68,.08);}
+  .opt.wrong::before{background:var(--red);}
+  .opt.wrong .opt-letter{background:var(--red);color:#fff;border-color:var(--red);}
+  .opt.disabled{cursor:default;}
+  .opt.reveal-correct{border-color:var(--green);background:rgba(34,197,94,.06);}
+  .opt.reveal-correct .opt-letter{background:var(--green);color:#000;border-color:var(--green);}
+
+  .feedback{
+    padding:14px 18px;
+    border-radius:10px;
+    font-size:14px;
+    margin-bottom:24px;
+    display:none;
+    border-left:3px solid;
+  }
+  .feedback.show{display:block;animation:slideUp .2s ease;}
+  .feedback.correct{background:rgba(34,197,94,.1);border-color:var(--green);color:#86efac;}
+  .feedback.wrong{background:rgba(239,68,68,.08);border-color:var(--red);color:#fca5a5;}
+  @keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+  .nav-row{display:flex;justify-content:flex-end;}
+  .next-btn{
+    background:var(--green);color:#000;
+    border:none;border-radius:10px;
+    padding:13px 36px;
+    font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;
+    cursor:pointer;transition:all .2s;display:none;
+  }
+  .next-btn:hover{background:#16a34a;transform:translateY(-1px);}
+  .next-btn.show{display:block;}
+
+  /* === RESULT === */
+  #result-screen{
+    display:none;
+    min-height:100vh;
+    align-items:center;justify-content:center;
+    flex-direction:column;
+    padding:60px 24px;
+    text-align:center;
+    position:relative;overflow:hidden;
+  }
+  #result-screen::before{
+    content:'';
+    position:absolute;inset:0;
+    background:radial-gradient(ellipse 70% 50% at 50% 30%, rgba(34,197,94,.12) 0%, transparent 70%);
+    pointer-events:none;
+  }
+
+  #canvas-confetti{position:fixed;inset:0;pointer-events:none;z-index:100;}
+
+  .result-badge{
+    font-size:80px;margin-bottom:24px;
+    animation:popIn .6s cubic-bezier(.36,1.56,.64,1) both;
+  }
+  @keyframes popIn{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+
+  .result-title{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:clamp(48px,8vw,90px);
+    color:#fff;
+    animation:fadeDown .6s .2s both;
+  }
+  .result-title span{color:var(--green);}
+
+  .big-score{
+    font-family:'JetBrains Mono',monospace;
+    font-size:clamp(52px,10vw,100px);
+    font-weight:700;
+    color:var(--green);
+    line-height:1;
+    margin:16px 0 8px;
+    animation:fadeDown .6s .3s both;
+  }
+  .score-label{color:var(--muted);font-size:14px;letter-spacing:.06em;text-transform:uppercase;animation:fadeDown .6s .35s both;}
+
+  .stats-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:16px;
+    max-width:480px;width:100%;
+    margin:40px auto;
+    animation:fadeDown .6s .45s both;
+  }
+  .stat-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:20px 16px;
+  }
+  .stat-card .stat-val{font-size:28px;font-weight:700;color:#fff;}
+  .stat-card .stat-key{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;}
+  .stat-card.green .stat-val{color:var(--green);}
+  .stat-card.red .stat-val{color:var(--red);}
+  .stat-card.amber .stat-val{color:var(--amber);}
+
+  .grade-bar{
+    max-width:400px;width:100%;
+    height:10px;background:var(--border);border-radius:100px;overflow:hidden;
+    margin:0 auto 12px;
+    animation:fadeDown .6s .5s both;
+  }
+  .grade-bar-fill{height:100%;background:linear-gradient(90deg,var(--green),#86efac);border-radius:100px;width:0;transition:width 1.2s .6s ease;}
+  .grade-text{font-size:18px;font-weight:600;animation:fadeDown .6s .55s both;}
+
+  .result-btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:40px;animation:fadeDown .6s .6s both;}
+  .btn-outline{
+    background:transparent;color:var(--text);
+    border:1.5px solid var(--border);border-radius:10px;
+    padding:13px 32px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;
+    cursor:pointer;transition:all .2s;
+  }
+  .btn-outline:hover{border-color:var(--green);color:var(--green);}
+  .btn-solid{
+    background:var(--green);color:#000;
+    border:none;border-radius:10px;
+    padding:13px 32px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;
+    cursor:pointer;transition:all .2s;
+  }
+  .btn-solid:hover{background:#16a34a;transform:translateY(-2px);}
+
+  @media(max-width:500px){
+    .stats-grid{grid-template-columns:1fr 1fr;}
+    .meta-row{gap:12px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="grid-bg"></div>
+  <div class="badge"><span></span>ProTrainers Consultant PTC</div>
+  <h1>HSE <span>Quiz</span><br>Challenge</h1>
+  <p class="hero-sub">Test your knowledge of Health, Safety & Environment across all three modules — 100 questions covering theory, first aid, fire safety, and environmental law.</p>
+  <div class="meta-row">
+    <div class="meta-pill"><strong>100</strong>Questions</div>
+    <div class="meta-pill"><strong>3</strong>Modules</div>
+    <div class="meta-pill"><strong>MCQ</strong>Format</div>
+    <div class="meta-pill"><strong>2022</strong>Version</div>
+  </div>
+  <button class="start-btn" onclick="startQuiz()">Start Quiz →</button>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz-screen">
+  <div class="quiz-header">
+    <div class="q-counter" id="q-counter">1 / 100</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill" style="width:1%"></div></div>
+    <div class="score-live">Score: <span id="live-score">0</span></div>
+  </div>
+  <div class="quiz-body">
+    <div class="section-tag" id="section-tag">Module 1</div>
+    <div class="question-text" id="q-text"></div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="nav-row"><button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question →</button></div>
+  </div>
+</section>
+
+<!-- RESULT -->
+<section id="result-screen">
+  <canvas id="canvas-confetti"></canvas>
+  <div class="result-badge" id="result-emoji">🏆</div>
+  <div class="result-title" id="result-title">Quiz <span>Complete!</span></div>
+  <div class="big-score" id="big-score">0%</div>
+  <div class="score-label">Final Score</div>
+  <div class="grade-bar"><div class="grade-bar-fill" id="grade-fill"></div></div>
+  <div class="grade-text" id="grade-text"></div>
+  <div class="stats-grid">
+    <div class="stat-card green"><div class="stat-val" id="r-correct">0</div><div class="stat-key">Correct</div></div>
+    <div class="stat-card red"><div class="stat-val" id="r-wrong">0</div><div class="stat-key">Wrong</div></div>
+    <div class="stat-card amber"><div class="stat-val" id="r-pct">0%</div><div class="stat-key">Accuracy</div></div>
+  </div>
+  <div class="result-btns">
+    <button class="btn-outline" onclick="reviewMode()">Review Answers</button>
+    <button class="btn-solid" onclick="restartQuiz()">Try Again</button>
+  </div>
+</section>
+
+<script>
+const ALL_QUESTIONS = [
+  // MODULE 1 — HEALTH & SAFETY INTRODUCTION
+  {s:"Module 1 — Health & Safety Intro",q:"The study of health and safety involves how many different subject areas?",o:["3","5","7","9"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"Which science is defined as 'the study of the structure of substances and how they react when combined'?",o:["Biology","Chemistry","Physics","Engineering"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"Psychology is best defined as:",o:["The study of human society","The study of the mind and how it influences behaviour","The study of matter and energy","The study of living organisms"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"What is the primary goal of HSE?",o:["Increase company profits","Protect employees, the public, and the environment","Reduce government oversight","Improve product quality only"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"According to the WHO (1948), health is defined as:",o:["Absence of disease","Physical fitness only","Complete physical, mental and social well-being","Freedom from injury"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"The WHO definition of health has been amended since 1948.",o:["True","False","Only partially","Depends on country"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"Homeostasis refers to:",o:["A disease state","The body's inner equilibrium","A chemical reaction","A legal principle"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"Safety is defined as the condition of being protected from:",o:["High workloads","Danger, risk, or injury","Regulatory fines","Environmental changes"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"The environment refers to:",o:["Only living organisms","Only weather patterns","Surroundings or conditions in which a person lives or operates","Only built structures"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"Which of the following is NOT listed as a workplace health benefit?",o:["Less absenteeism","Improved morale","Higher product prices","Fewer injuries"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"What are the three major aspects of workplace health?",o:["Physical, Mental, Emotional","Occupational Health & Safety, Healthy Choices, Organizational Health","Compliance, Training, Auditing","Policy, Planning, Review"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"The main aim of HSE Compliance Management is to:",o:["Increase production","Reduce litigation risk","Attract investors","Eliminate all workplace roles"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"An accident is best described as:",o:["A planned event","An unplanned event causing damage or injury","A deliberate act","A near-miss only"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"Which type of accident is described as the most common?",o:["Boat accidents","Train accidents","Auto accidents","Work accidents"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"Approximately how many people die globally from auto accidents each year?",o:["500,000","1.2 million","3 million","10 million"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"Wrongful death or clinical negligence refers to:",o:["Accidents caused by bad weather","Negligence by medical staff that causes harm to a patient","Sports injuries","Boat accidents"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"Accident Investigation is the process of determining:",o:["Who to blame","Root causes of accidents to prevent recurrence","Insurance claim amounts","Government fines"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"Which of these is NOT a direct consequence of an accident?",o:["Personal injury","Property loss","Lost income","Medical expenses"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"A 'Near Miss' is defined as:",o:["An accident that caused minor injury","An unplanned event with potential for harm that did NOT occur","A deliberate unsafe act","A documented hazard"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"A Dangerous Occurrence is:",o:["Any workplace injury","A specific reportable event required by statute law","A near miss only","An equipment failure"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"Change Analysis involves which key step?",o:["Blaming a person","Establishing the norm and identifying the change","Ignoring minor changes","Reviewing insurance records"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"Which common problem-solving method involves breaking a task into individual steps to identify hazards?",o:["Change Analysis","Sequence Diagrams","Job Hazard Analysis","Witness Interview"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"The three reasons for managing health & safety in an organization are:",o:["Legal, financial, political","Moral, social/legal, economic","Personal, social, environmental","Technical, cultural, financial"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"The Piper Alpha disaster occurred on:",o:["July 6, 1988","July 6, 1998","June 7, 1988","August 6, 1988"],a:0},
+  {s:"Module 1 — Health & Safety Intro",q:"How many crew members died in the Piper Alpha incident?",o:["120","167","200","220"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"The Piper Alpha disaster was primarily attributed to:",o:["Mechanical failure only","Environmental factors","Human error","Arson"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"The Cullen Inquiry into Piper Alpha presented how many recommendations?",o:["56","84","106","200"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"After Piper Alpha, responsibility for North Sea safety shifted to:",o:["The Ministry of Defence","The Health and Safety Executive","Occidental Petroleum","The Department of Energy"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"Which lesson was highlighted from the Piper Alpha incident?",o:["Lack of environmental policy","Unavailability of PTW (Permit to Work) System","Excess staffing","Poor recruitment"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"HSE Commitment is a statement maintaining what?",o:["Minimum safety standards","Highest standards of performance and business excellence","Only regulatory compliance","Only workers' wages"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"The PDCA Cycle in HSE Management stands for:",o:["Plan, Do, Check, Act","Prepare, Deploy, Control, Assess","Plan, Document, Correct, Audit","Prevent, Detect, Control, Adapt"],a:0},
+  {s:"Module 1 — Health & Safety Intro",q:"OSHAS 18001 is a standard for:",o:["Quality management","Environmental management","Health and safety management","Financial management"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"A Hot Work Permit is issued by:",o:["The safety manager","The Fire Marshal or person responsible for fire safety","The HR department","A government body"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"The Confined Space Entry Permit regulates entry into:",o:["High-rise buildings","Pits, tanks, and vessels","Parking areas","Chemical laboratories"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"ISO 14001 is a standard for:",o:["Quality management","Health and safety management","Environmental management","Risk management"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"A safety policy should be signed by:",o:["The HR manager","The Safety Officer","The person at the top of the organization","Any employee"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"Which circumstance would require a review of the HSE policy?",o:["New office furniture","Introduction of new technology or equipment","Seasonal staff absence","Holiday schedule changes"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"Personal Protective Equipment (PPE) works by:",o:["Removing hazards entirely","Reducing exposure by changing work practices","Placing a barrier between the employee and the hazard","Eliminating the need for training"],a:2},
+  {s:"Module 1 — Health & Safety Intro",q:"What does P.A.S.S. stand for when using a fire extinguisher?",o:["Prepare, Assess, Spray, Secure","Pull, Aim, Squeeze, Sweep","Point, Activate, Spray, Sweep","Position, Aim, Squeeze, Stand"],a:1},
+  {s:"Module 1 — Health & Safety Intro",q:"A hazard is defined as:",o:["A workplace injury","Anything that could hurt you or make you sick","A near-miss event","A safety policy violation"],a:1},
+
+  // MODULE 2 — FIRST AID & CPR
+  {s:"Module 2 — First Aid & CPR",q:"First Aid is described as:",o:["Full medical treatment","Immediate care given before qualified medical help arrives","A substitute for doctors","Long-term care"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"Implied Consent in first aid applies to:",o:["All victims","Responsive victims only","Unresponsive victims in a life-threatening condition","Minors only"],a:2},
+  {s:"Module 2 — First Aid & CPR",q:"The Scene Survey involves looking for how many key elements?",o:["Two","Three","Four","Five"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"In the Initial Assessment, ABC stands for:",o:["Alert, Breathing, Circulation","Airway, Breathing, Circulation","Assess, Bandage, Compress","Airway, Blood, Compress"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"'A' in the ABC check means:",o:["Alert the paramedics","Airway — is it open?","Apply pressure","Assess the scene"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"How is it determined whether a victim is conscious in the initial assessment?",o:["Visual observation only","Tap and shout","Check pulse only","Smell test"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"CPR stands for:",o:["Cardiac Pulse Resuscitation","Cardiopulmonary Resuscitation","Cardiovascular Pressure Response","Critical Patient Revival"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"The American Heart Association recommends CPR should begin with:",o:["Rescue breathing","Checking vitals","Chest compressions","Calling for help first"],a:2},
+  {s:"Module 2 — First Aid & CPR",q:"For an untrained bystander, the recommended CPR action is:",o:["Rescue breathing only","Hands-only CPR at about 100 compressions per minute","Wait for paramedics","Two-person CPR"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"For a trained rescuer, CPR begins with how many chest compressions before checking the airway?",o:["10","20","30","50"],a:2},
+  {s:"Module 2 — First Aid & CPR",q:"Butterfly sutures are used to:",o:["Inject medication","Close small wounds","Prevent infection internally","Support broken bones"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"Which of the following is used to prevent infection in wounds?",o:["Lidocaine","Ibuprofen","Antiseptic wipes and peroxide","Chemical ice bags"],a:2},
+  {s:"Module 2 — First Aid & CPR",q:"Anaphylaxis is a severe reaction to:",o:["Cold temperatures","Allergens","Over-exertion","Noise"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"First aid kits are typically identified by:",o:["A red cross on a blue box","A white cross on a green or red box/bag","A yellow triangle","A black label"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"Which pain management item is commonly found in a first aid kit?",o:["Antibiotics","Aspirin or Ibuprofen","Surgical instruments","Radioactive materials"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"Infection control is defined as:",o:["Treatment of infected patients","The set of methods used to control and prevent the spread of disease","Disposal of medical waste","Vaccination programs"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"A communicable disease is one that:",o:["Is caused by genetics","Spreads from one person to another","Only affects the elderly","Is always fatal"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"Universal Precautions are guidelines designed to protect workers from:",o:["Chemical spills","Diseases spread by blood and certain body fluids","Radiation","Noise pollution"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"Which of these is a MODE of transmission of infection?",o:["Age","Immune deficiency","Droplets — coughing, sneezing, spitting","Stress"],a:2},
+  {s:"Module 2 — First Aid & CPR",q:"Portals of entry for pathogens include:",o:["Intact unbroken skin","Cuts, abrasions or breaks in the skin","Hair and nails","Clothing"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"Who is most at risk for hospital-acquired infections?",o:["Young adults","Children","The elderly","Athletes"],a:2},
+  {s:"Module 2 — First Aid & CPR",q:"When should gloves be worn?",o:["Only during surgery","When there may be contact with blood, body fluids, or broken skin","Only when handling chemicals","Never in the workplace"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"EAR stands for:",o:["Emergency Alert Response","Expired Air Resuscitation","External Airway Restoration","Emergency Aid Response"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"A first aider performing the Scene Survey should also note:",o:["The victim's name","The cause (mechanism) of injury or illness","The cost of treatment","The hospital's distance"],a:1},
+  {s:"Module 2 — First Aid & CPR",q:"Erythromycin is an example of:",o:["An antiseptic","A pain killer","A broad-spectrum antibiotic","A wound dressing"],a:2},
+
+  // MODULE 3 — THE ENVIRONMENT
+  {s:"Module 3 — The Environment",q:"The environment encompasses which of the following?",o:["Only living things","Only built structures","Living things, non-living things, and our built environment","Only weather patterns"],a:2},
+  {s:"Module 3 — The Environment",q:"Which of the following is listed as a major environmental issue?",o:["Overpopulation only","Deforestation, acid rain, water and air pollution","Noise only","Lighting pollution only"],a:1},
+  {s:"Module 3 — The Environment",q:"Acid rain is primarily a result of:",o:["Volcanic eruptions","Water evaporation","Air pollution from burning fuels","Deforestation"],a:2},
+  {s:"Module 3 — The Environment",q:"Which gases react with water in clouds to form acid rain?",o:["Oxygen and hydrogen","Nitrogen oxides and sulphur dioxide","Carbon dioxide and methane","Argon and nitrogen"],a:1},
+  {s:"Module 3 — The Environment",q:"Deforestation most dramatically causes:",o:["Soil enrichment","Loss of habitat for millions of species","Reduction in acid rain","Improved air quality"],a:1},
+  {s:"Module 3 — The Environment",q:"What percentage of Earth's land animals and plants live in forests?",o:["50%","60%","70%","80%"],a:2},
+  {s:"Module 3 — The Environment",q:"Land pollution is defined as:",o:["Contamination of water bodies","Degradation of Earth's surface by misuse of resources and improper waste disposal","Noise from industrial activities","Air contamination"],a:1},
+  {s:"Module 3 — The Environment",q:"Water pollution is defined as:",o:["Contamination of air by water droplets","Contamination of water bodies, often by human activities","Flooding of land areas","Erosion of riverbanks"],a:1},
+  {s:"Module 3 — The Environment",q:"Noise pollution is:",o:["Any sound above 10 decibels","Any loud sounds harmful or annoying to humans and animals","Background music","Vibration only"],a:1},
+  {s:"Module 3 — The Environment",q:"Air pollution occurs when:",o:["Clean air circulates","Gases, dust, fumes or odour make the atmosphere harmful","Oxygen levels increase","Weather patterns shift"],a:1},
+  {s:"Module 3 — The Environment",q:"What percentage of health-care waste is considered general (non-hazardous)?",o:["20%","50%","80%","95%"],a:2},
+  {s:"Module 3 — The Environment",q:"The remaining 20% of health-care waste may be:",o:["Recyclable only","General waste","Infectious, toxic or radioactive","Biodegradable"],a:2},
+  {s:"Module 3 — The Environment",q:"Health-care waste includes waste from which sources?",o:["Only hospitals","Health-care establishments, research facilities, laboratories, and home care","Only laboratories","Government offices only"],a:1},
+  {s:"Module 3 — The Environment",q:"Which category of health-care waste includes used needles and scalpels?",o:["Pathological","Radioactive","Sharps","Chemical"],a:2},
+  {s:"Module 3 — The Environment",q:"Pathological waste includes:",o:["Expired pharmaceuticals","Human tissues, organs, body parts, fetuses","Used syringes","Chemical reagents"],a:1},
+  {s:"Module 3 — The Environment",q:"What is waste segregation's primary benefit?",o:["Increases total waste volume","Reduces the quantity requiring specialized treatment","Eliminates all hazardous waste","Lowers staffing costs"],a:1},
+  {s:"Module 3 — The Environment",q:"NESREA stands for:",o:["National Environmental Safety Regulatory and Enforcement Agency","National Environmental Standards Regulatory and Enforcement Agency","Nigerian Environmental Standards Regulations and Enforcement Agency","National Environmental Sustainability and Regulatory Agency"],a:1},
+  {s:"Module 3 — The Environment",q:"When was NESREA Act signed into law?",o:["1988","1999","2007","2012"],a:2},
+  {s:"Module 3 — The Environment",q:"NESREA's vision is to:",o:["Regulate oil production","Ensure a cleaner and healthier environment for all Nigerians","Manage urban housing","Control import and export"],a:1},
+  {s:"Module 3 — The Environment",q:"The toxic waste dumping at Koko Village, Delta State, occurred in:",o:["1980","1987","1993","2000"],a:1},
+  {s:"Module 3 — The Environment",q:"Which Act established the Federal Environmental Protection Agency (FEPA)?",o:["Decree 42 of 1988","Decree 58 of 1988","NESREA Act 2007","Constitution Section 20"],a:1},
+  {s:"Module 3 — The Environment",q:"An Environmental Policy is defined as:",o:["A government tax on emissions","A statement of an organization's intentions and principles regarding environmental performance","A technical standard for waste treatment","A legal prosecution document"],a:1},
+  {s:"Module 3 — The Environment",q:"ISO 14001 governs which type of management system?",o:["Quality","Health and safety","Environmental","Risk"],a:2},
+  {s:"Module 3 — The Environment",q:"Which of the following is a key objective of Environmental Auditing?",o:["Maximize profit","Minimize human exposure to risks from environmental, health and safety problems","Eliminate all regulations","Reduce staff numbers"],a:1},
+  {s:"Module 3 — The Environment",q:"Pre-audit steps include:",o:["Conducting surprise inspections","Planning, selecting the audit team, and obtaining background information on the facility","Dismissing under-performing staff","Calculating fines"],a:1},
+  {s:"Module 3 — The Environment",q:"Which statement best describes Risk Management?",o:["Avoiding all business activities","Understanding, analyzing and addressing risk to help organizations achieve objectives","Transferring all risk to insurance companies","Ignoring low-probability events"],a:1},
+  {s:"Module 3 — The Environment",q:"ISO 31000:2009 is a standard for:",o:["Environmental management","Quality management","Risk Management Principles and Guidelines","Occupational health"],a:2},
+  {s:"Module 3 — The Environment",q:"Safety sign regulations in the UK came into force on:",o:["1 January 1990","1 April 1996","1 July 2000","1 March 1988"],a:1},
+  {s:"Module 3 — The Environment",q:"A prohibition sign is a sign that:",o:["Prescribes specific behavior","Warns of a hazard","Prohibits behavior likely to cause danger","Indicates an emergency exit"],a:2},
+  {s:"Module 3 — The Environment",q:"A mandatory sign:",o:["Warns of danger","Prohibits access","Prescribes specific behavior (e.g. wear eye protection)","Indicates fire exits"],a:2},
+  {s:"Module 3 — The Environment",q:"Yellow safety colour means:",o:["Stop — do not proceed","Be careful / take precautions","Emergency exit this way","Fire hazard"],a:1},
+
+  // FIRE SAFETY
+  {s:"Module 3 — Fire Safety",q:"Class A fires involve:",o:["Flammable liquids","Ordinary combustibles like wood, cloth, paper","Combustible metals","Energized electrical equipment"],a:1},
+  {s:"Module 3 — Fire Safety",q:"Class B fires involve:",o:["Wood and paper","Electrical equipment","Flammable liquids like gasoline and petroleum oil","Cooking oils"],a:2},
+  {s:"Module 3 — Fire Safety",q:"Class C fires involve:",o:["Combustible metals","Ordinary combustibles","Energized electrical equipment","Cooking oils and fats"],a:2},
+  {s:"Module 3 — Fire Safety",q:"Class D fires involve:",o:["Flammable liquids","Ordinary combustibles","Cooking oils","Combustible metals such as sodium and magnesium"],a:3},
+  {s:"Module 3 — Fire Safety",q:"Class K or F fires involve:",o:["Electrical fires","Combustible metals","Cooking oils and greases such as animal and vegetable fats","Flammable gases"],a:2},
+  {s:"Module 3 — Fire Safety",q:"A Stoned Pressure Water Extinguisher is used to extinguish:",o:["Class B fires only","Class A fires only","Class C fires only","All classes of fire"],a:1},
+  {s:"Module 3 — Fire Safety",q:"Carbon Dioxide (CO2) extinguishers are suitable for:",o:["Class A fires","Class A and K fires","Class B and D fires","Class D fires only"],a:2},
+  {s:"Module 3 — Fire Safety",q:"Wet Chemical Extinguishers are suitable for:",o:["Class B and C fires","Class A and K/F fires","Class D fires","Class C fires only"],a:1},
+  {s:"Module 3 — Fire Safety",q:"Water extinguishers should NOT be used on Class C fires because:",o:["They are too small","They could create a shock hazard","They evaporate too quickly","They are too expensive"],a:1},
+  {s:"Module 3 — Fire Safety",q:"Carbon Dioxide extinguishers extinguish fire by:",o:["Cooling with water","Interrupting the chemical reaction","Removing oxygen and removing heat with a cold discharge","Separating metal from fuel"],a:2},
+  {s:"Module 3 — Fire Safety",q:"The most widely used fire extinguisher today is:",o:["CO2 extinguisher","Wet chemical extinguisher","Multipurpose dry chemical extinguisher","Water and foam extinguisher"],a:2},
+  {s:"Module 3 — Fire Safety",q:"Dry Powder extinguishers are intended for:",o:["Class A fires","Class B and C fires","Class D combustible metal fires","All classes"],a:2},
+  {s:"Module 3 — Fire Safety",q:"REACT upon discovery of fire stands for:",o:["Run, Escape, Alert, Call, Try","Remove persons, Ensure doors closed, Activate alarm, Call fire dept, Treat fires as dangerous","Report, Evacuate, Assess, Control, Train","Respond, Extinguish, Assess, Contain, Track"],a:1},
+  {s:"Module 3 — Fire Safety",q:"You should use a portable fire extinguisher ONLY if:",o:["You feel confident","The fire is large and spreading","The building is being evacuated and the fire department has been called","You are alone"],a:2},
+  {s:"Module 3 — Fire Safety",q:"When using a fire extinguisher, you should stand back approximately:",o:["1–2 feet","3–4 feet","6–8 feet","10–12 feet"],a:2},
+  {s:"Module 3 — Fire Safety",q:"In the PASS method, 'AIM' refers to:",o:["Aim at the top of the flames","Aim low at the base of the fire","Aim at the smoke","Aim upward"],a:1},
+  {s:"Module 3 — Fire Safety",q:"FFFP Foam Extinguishers are designed for use on:",o:["Class C fires only","Class D fires only","Class A and B fires","Class K fires only"],a:2},
+  {s:"Module 3 — Fire Safety",q:"The discharge time of a hand-carried Dry Chemical Powder Extinguisher is approximately:",o:["5–10 seconds","10–25 seconds","30–60 seconds","1–2 minutes"],a:1},
+  {s:"Module 3 — Fire Safety",q:"Which common feature of a fire extinguisher prevents accidental discharge?",o:["Pressure gauge","Discharge nozzle","Locking pin","Carrying handle"],a:2},
+  {s:"Module 3 — Fire Safety",q:"The NFPA capacity rating on a fire extinguisher indicates:",o:["The weight of the extinguisher","The type of chemical used","The classification and capacity rating of the extinguisher","The year of manufacture"],a:2},
+
+  // RISK MANAGEMENT & ADDITIONAL
+  {s:"Module 1 — Safety Systems",q:"Enterprise Risk Management (ERM) is described as:",o:["A single-department activity","An integrated approach to managing risk across an organization and its networks","A government mandate only","A financial tool only"],a:1},
+  {s:"Module 1 — Safety Systems",q:"The Risk Management process is described as:",o:["A one-time activity","A static procedure","An iterative process contributing to organizational improvement","A purely financial exercise"],a:2},
+  {s:"Module 1 — Safety Systems",q:"In risk management, 'Likelihood Descriptors' are described as:",o:["Unique to each project","Fairly generic across contexts","Always numerical","Set by government only"],a:1},
+  {s:"Module 1 — Safety Systems",q:"Generally, any risk rated High or Extreme should:",o:["Be ignored until resources are available","Have additional controls applied to reduce the rating","Be transferred to insurance","Be accepted as unavoidable"],a:1},
+  {s:"Module 1 — Safety Systems",q:"The key elements of the HSE Management System include all EXCEPT:",o:["Policy","Auditing","Continual improvement","Maximizing profits"],a:3},
+  {s:"Module 1 — Safety Systems",q:"Safety procedures should be communicated in:",o:["Written form only","Verbal form only","Both written and verbal form, and demonstrated","Diagrams only"],a:2},
+  {s:"Module 1 — Safety Systems",q:"Which statement about safety rules is correct?",o:["One list of rules works for all businesses","Rules only need to be communicated to management","All rules must be consistently and equitably enforced","Rules are optional guidelines"],a:2},
+  {s:"Module 3 — Environment",q:"Nigeria spans approximately how much land area?",o:["524,000 sq km","724,000 sq km","924,000 sq km","1,024,000 sq km"],a:2},
+  {s:"Module 3 — Environment",q:"The Harmful Waste Decree 42 of 1988 was prompted by:",o:["The Niger Delta oil spill","The dumping of toxic waste at Koko village","A major industrial accident","Flooding in Lagos"],a:1},
+  {s:"Module 3 — Environment",q:"Environmental Auditing is defined as a management tool that is:",o:["Informal and ad hoc","Systematic, documented, periodic, and objective","Voluntary and non-binding only","Conducted only by government agents"],a:1},
+  {s:"Module 3 — Environment",q:"NESREA has the power to establish mobile courts to:",o:["Process employee complaints","Expeditiously dispense cases of environmental regulation violations","Adjudicate labour disputes","Grant construction permits"],a:1},
+  {s:"Module 3 — Environment",q:"Which of the following best describes 'Organizational Health' in workplace health?",o:["Physical fitness programs","Traditional health promotion activities","Management practices that focus on culture, relationships, and values","Individual medical checks"],a:2},
+  {s:"Module 2 — First Aid & CPR",q:"The victim assessment for an UNRESPONSIVE victim involves:",o:["Asking them questions","Observing from head to toe and providing first aid/CPR for observed injuries","Waiting for paramedics only","Checking ID documents"],a:1},
+  {s:"Module 1 — Safety Systems",q:"When should an HSE policy typically be reviewed at minimum?",o:["Every 5 years","Every 10 years","Annually","Only when an accident occurs"],a:2},
+  {s:"Module 3 — Fire Safety",q:"Which step comes LAST in the PASS method?",o:["Pull","Aim","Squeeze","Sweep"],a:3},
+  {s:"Module 3 — Fire Safety",q:"A Stoned Pressure Water Extinguisher stream can reach up to how many feet under normal conditions?",o:["5–10 feet","15–30 feet","30–50 feet","50–100 feet"],a:1},
+  {s:"Module 3 — Environment",q:"The ECS (Environmental Conservation Strategy) covered which of the following?",o:["Political governance only","Land use, natural resources, urban environment, waste management, and infrastructure","Economic planning only","Foreign policy"],a:1},
+  {s:"Module 1 — Safety Systems",q:"Steps to Accident Investigation include all EXCEPT:",o:["Survey the scene","Collect evidence","Determine causes","File insurance first without investigation"],a:3},
+  {s:"Module 1 — Safety Systems",q:"A successful HSE system requires which of the following?",o:["Management commitment, employee involvement, hazard control, training, and continuous improvement","Only written policies","Only employee involvement","Only compliance with regulations"],a:0},
+  {s:"Module 2 — First Aid & CPR",q:"Broad-spectrum antibiotics like Ciprofloxacin are important in first aid kits primarily for:",o:["Pain management","Preventing infection, especially in survival/wilderness situations","Treating allergies","Reducing inflammation only"],a:1},
+];
+
+let questions = [], currentIdx = 0, score = 0, answers = [];
+
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5);}
+
+function startQuiz(){
+  questions = shuffle(ALL_QUESTIONS);
+  currentIdx = 0; score = 0; answers = [];
+  document.getElementById('hero').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  loadQuestion();
+}
+
+function loadQuestion(){
+  const q = questions[currentIdx];
+  const total = questions.length;
+  document.getElementById('q-counter').textContent = `${currentIdx+1} / ${total}`;
+  document.getElementById('progress-fill').style.width = `${((currentIdx)/total)*100}%`;
+  document.getElementById('live-score').textContent = score;
+  document.getElementById('section-tag').textContent = q.s;
+  document.getElementById('q-text').textContent = `${currentIdx+1}. ${q.q}`;
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback'; fb.textContent = '';
+  document.getElementById('next-btn').className = 'next-btn';
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.o.forEach((opt,i)=>{
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    div.onclick = ()=>selectAnswer(i, div);
+    opts.appendChild(div);
+  });
+}
+
+function selectAnswer(idx, el){
+  const q = questions[currentIdx];
+  const allOpts = document.querySelectorAll('.opt');
+  allOpts.forEach(o=>o.classList.add('disabled'));
+  const fb = document.getElementById('feedback');
+  const isCorrect = idx === q.a;
+  if(isCorrect){
+    el.classList.add('correct');
+    score++;
+    fb.textContent = '✓ Correct!';
+    fb.className = 'feedback correct show';
+  } else {
+    el.classList.add('wrong');
+    allOpts[q.a].classList.add('reveal-correct');
+    fb.textContent = `✗ Wrong. Correct answer: ${q.o[q.a]}`;
+    fb.className = 'feedback wrong show';
+  }
+  answers.push({q:q.q, chosen:idx, correct:q.a, isCorrect});
+  document.getElementById('live-score').textContent = score;
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+function nextQuestion(){
+  currentIdx++;
+  if(currentIdx >= questions.length) showResult();
+  else loadQuestion();
+}
+
+function showResult(){
+  document.getElementById('quiz-screen').style.display = 'none';
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'flex';
+  const pct = Math.round((score/questions.length)*100);
+  document.getElementById('r-correct').textContent = score;
+  document.getElementById('r-wrong').textContent = questions.length - score;
+  document.getElementById('r-pct').textContent = pct + '%';
+  
+  // Animate score counter
+  let n = 0;
+  const scoreEl = document.getElementById('big-score');
+  const interval = setInterval(()=>{
+    n = Math.min(n+2, pct);
+    scoreEl.textContent = n + '%';
+    if(n >= pct) clearInterval(interval);
+  }, 20);
+
+  setTimeout(()=>{
+    document.getElementById('grade-fill').style.width = pct + '%';
+  }, 100);
+
+  let emoji, title, grade;
+  if(pct >= 90){emoji='🏆';title='Outstanding!';grade='Grade A — Excellent command of HSE principles';}
+  else if(pct >= 75){emoji='🎯';title='Great Work!';grade='Grade B — Strong understanding demonstrated';}
+  else if(pct >= 60){emoji='👍';title='Good Effort!';grade='Grade C — Satisfactory, review key areas';}
+  else if(pct >= 50){emoji='📚';title='Keep Studying!';grade='Grade D — Review all three modules carefully';}
+  else{emoji='💪';title='Keep Going!';grade='Grade F — Revisit all HSE material and try again';}
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').innerHTML = `Quiz <span>${title}</span>`;
+  document.getElementById('grade-text').textContent = grade;
+
+  if(pct >= 60) launchConfetti();
+}
+
+function restartQuiz(){
+  document.getElementById('result-screen').style.display = 'none';
+  startQuiz();
+}
+
+function reviewMode(){
+  alert(`Review coming — you scored ${score}/${questions.length}. ${questions.length - score} incorrect answers.`);
+}
+
+// ============ CONFETTI ============
+function launchConfetti(){
+  const canvas = document.getElementById('canvas-confetti');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const particles = [];
+  const colors = ['#22c55e','#86efac','#f59e0b','#fbbf24','#fff','#6ee7b7'];
+  for(let i=0;i<180;i++){
+    particles.push({
+      x: Math.random()*canvas.width,
+      y: -20 - Math.random()*200,
+      vx: (Math.random()-0.5)*4,
+      vy: 2 + Math.random()*4,
+      r: 4 + Math.random()*7,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      rotation: Math.random()*360,
+      rotSpeed: (Math.random()-0.5)*6,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle',
+      w: 6 + Math.random()*8,
+      h: 3 + Math.random()*5,
+      alpha: 1
+    });
+  }
+  let frame = 0;
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      p.x += p.vx; p.y += p.vy;
+      p.rotation += p.rotSpeed;
+      if(frame > 80) p.alpha = Math.max(0, p.alpha - 0.006);
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI/180);
+      ctx.fillStyle = p.color;
+      if(p.shape === 'rect'){ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);}
+      else{ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.fill();}
+      ctx.restore();
+    });
+    frame++;
+    if(particles.some(p=>p.alpha>0)) requestAnimationFrame(draw);
+    else ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+  draw();
+}
+</script>
+</body>
+</html>
